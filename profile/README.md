@@ -1,1 +1,1 @@
-Welcome
+Welcome to the Dashboard organization.
