@@ -34,6 +34,11 @@ services:
       - 3000:3000
     env_file:
     - ./.env
+    environment:
+        REACT_APP_REDIRECT_URI: "http://localhost:3000"
+        REACT_APP_USER_PREFRERENCES_URL: "http://localhost:8000"
+        REACT_APP_INTEGRATIONS_URL: "https://localhost:8001"
+        REACT_APP_INTEGRATIONS_URL_INSECURE: "http://localhost:81"
     
   user-preferences-db:
     container_name: user-preferences-db
@@ -51,18 +56,40 @@ services:
     env_file:
     - ./.env
     links:
-     - user-preferences-db
+    - user-preferences-db
+    environment:
+        USER_PREF_DB_URL: "mongodb://user-preferences-db:27017/"
+
+  integration-db:
+    container_name: integration-db
+    restart: unless-stopped
+    image: mongo
+    ports:
+        - 27016:27017
+        
+  integrations-api:
+    container_name: integrations-api
+    restart: unless-stopped
+    image: teunlukas/dashboard-integration-api:main
+    ports:
+        - 8001:443
+        - 81:80
+    links:
+    - integration-db
+    env_file:
+    - ./.env
+    environment:
+        INTEGRATION_DB_URL: "mongodb://integration-db:27017"
 ```
 
 In the docker compose file there are a few enviroment variables.
 To start up this project you will need your own Client ID and CLient Secret.
 You can find more information on how to get these [here](https://developers.google.com/identity/sign-in/web/sign-in).
+You also need an API key for [OpenWeatherMap](https://openweathermap.org/price)
 ```
 REACT_APP_CLIENT_ID = ...
 REACT_APP_CLIENT_SECRET = ...
-REACT_APP_REDIRECT_URI = http://localhost:3000
-REACT_APP_USER_PREFRERENCES_URL = http://localhost:8000
-USER_PREF_DB_URL ='mongodb://user-preferences-db:27017/'
+OPENWEATHERMAP_APIKEY = ...
 ```
 
 Save the docker compose in a folder as "docker-compose.yml".
